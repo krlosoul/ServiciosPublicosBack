@@ -1,0 +1,60 @@
+CREATE DATABASE SYSPROTEC
+
+USE SYSPROTEC;
+
+CREATE TABLE [User](
+	Id INT IDENTITY NOT NULL,
+	Name VARCHAR(15) NOT NULL,
+	Email VARCHAR(45) NOT NULL,
+	CONSTRAINT Pk_User_Id PRIMARY KEY (Id)
+);
+
+CREATE TABLE [Role](
+	Id INT IDENTITY NOT NULL,
+	Name VARCHAR(15) NOT NULL,
+	CONSTRAINT Pk_Role_Id PRIMARY KEY (Id)
+);
+
+CREATE TABLE UserRole (
+    IdUser INT NOT NULL,
+    IdRole INT NOT NULL,
+    CONSTRAINT Pk_UserRole_Id PRIMARY KEY (IdUser, IdRole),
+    CONSTRAINT Fk_UserRole_User FOREIGN KEY (IdUser) REFERENCES [User](Id),
+    CONSTRAINT Fk_UserRole_Role FOREIGN KEY (IdRole) REFERENCES [Role](Id)
+);
+
+CREATE TABLE Service(
+	Id INT IDENTITY NOT NULL,
+	Name VARCHAR(45) NOT NULL,
+	CONSTRAINT Pk_Service_Id PRIMARY KEY (Id)
+);
+
+CREATE TABLE Status(
+	Id INT IDENTITY NOT NULL,
+	Name VARCHAR(15) NOT NULL,
+	CONSTRAINT Pk_Status_Id PRIMARY KEY (Id)
+);
+
+CREATE TABLE Report(
+	Id INT IDENTITY NOT NULL,
+	IdService INT NOT NULL,
+	IdStatus INT NOT NULL,
+	IdUser INT NOT NULL,
+	Observation VARCHAR(150) NOT NULL,
+	CreationOn DATETIME NOT NULL,
+	CONSTRAINT Pk_Report_Id PRIMARY KEY (Id),
+	CONSTRAINT Pk_Report_Service FOREIGN KEY (IdService) REFERENCES Service(Id),
+	CONSTRAINT Pk_Report_Status FOREIGN KEY (IdStatus) REFERENCES Status(Id),
+	CONSTRAINT Pk_Report_User FOREIGN KEY (IdUser) REFERENCES [User](Id)
+);
+
+CREATE PROCEDURE [Sp_Post_Report]
+	@IdService INT,
+	@IdStatus INT,
+	@IdUser INT,
+	@Observation VARCHAR(150)
+AS
+BEGIN
+	INSERT INTO Report(IdService, IdStatus, IdUser, Observation, CreationOn) 
+	VALUES(@IdService,@IdStatus,@IdUser,@Observation,GETDATE())
+END
